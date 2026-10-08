@@ -1,10 +1,12 @@
+import random
+
 import pygame
 
 pygame.init()
 
-WIDTH = 800
-HEIGHT = 600
-SIZE = 20
+WIDTH = 1100
+HEIGHT = 700
+SIZE = 15
 grid = []
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CONWAYS GAME OF LIFE")
@@ -15,12 +17,25 @@ BLACK = (0, 0, 0)
 GREY = (100, 100, 100)
 RED = (255, 0, 0)
 GREEN = (0, 200, 100)
+BLUE = (0, 0, 255)
+ORANGE = (255, 255, 0)
+YELLOW = (0, 255, 255)
+
+colours = [RED, GREEN, BLUE, YELLOW, ORANGE]
+color_roulete = 0
 
 for i in range(int(WIDTH/SIZE)):
     grid.append([])
     for j in range(int(HEIGHT/SIZE)):
         grid[i].append(0)
 
+COLS = int(WIDTH / SIZE)
+ROWS = int(HEIGHT / SIZE)
+
+def randomize_grid():
+    for i in range(COLS):
+        for j in range(ROWS):
+            grid[i][j] = random.randint(0, 1)
 
 playing = False
 running = True
@@ -44,29 +59,37 @@ while running:
                     for j in range(int(HEIGHT/SIZE)):
                         grid[i].append(0)
 
+            if event.key == pygame.K_c:
+                randomize_grid()
+
 
         if not playing and event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 x = int(event.pos[0]/SIZE)
                 y = int(event.pos[1]/SIZE)
-                if grid[x][y] == 1:
-                    grid[x][y] = 0
-                else:
-                    grid[x][y] = 1
+                if 0 <= x < COLS and 0 <= y < ROWS:
+                    if grid[x][y] == 1:
+                        grid[x][y] = 0
+                    else:
+                        grid[x][y] = 1
     screen.fill(BLACK)
 
     if playing:
+        color_roulete += 0
         grid_copy = [row[:] for row in grid]
-        for i in range(int(WIDTH/SIZE)):
-            for j in range(int(HEIGHT/SIZE)):
+        for i in range(COLS):
+            for j in range(ROWS):
                 neighbors = 0
                 for move_x in [-1, 0, 1]:
                     for move_y in [-1, 0, 1]:
                         if move_x == 0 and move_y == 0:
                             continue
-                        neighbor_x = (i+move_x)%int(WIDTH/SIZE)
-                        neighbor_y = (j+move_y)%int(HEIGHT/SIZE)
-                        neighbors += grid_copy[neighbor_x][neighbor_y]
+                        #neighbor_x = (i+move_x)%int(WIDTH/SIZE)
+                        #neighbor_y = (j+move_y)%int(HEIGHT/SIZE)
+                        neighbor_x = i+move_x
+                        neighbor_y = j+move_y
+                        if 0 <= neighbor_x < COLS and 0 <= neighbor_y < ROWS:
+                            neighbors += grid_copy[neighbor_x][neighbor_y]
 
                 # conways rules
                 if grid_copy[i][j] == 1:
@@ -77,16 +100,16 @@ while running:
                         grid[i][j] = 1
                 
     # make grid
-    for i in range(int(WIDTH/SIZE)):
+    for i in range(COLS):
         pygame.draw.line(screen, GREY, (i*SIZE, 0), (i*SIZE, HEIGHT))
-    for i in range(int(HEIGHT/SIZE)):
+    for i in range(ROWS):
         pygame.draw.line(screen, GREY, (0, i*SIZE), (WIDTH, i*SIZE))
 
-    for i in range(int(WIDTH/SIZE)):
-        for j in range(int(HEIGHT/SIZE)):
+    for i in range(COLS):
+        for j in range(ROWS):
             sqr = grid[i][j]
             if sqr == 1:
-                pygame.draw.rect(screen, GREEN, (i*SIZE, j*SIZE, SIZE, SIZE))
+                pygame.draw.rect(screen, colours[(color_roulete)%len(colours)], (i*SIZE, j*SIZE, SIZE, SIZE))
 
     pygame.display.flip()
 
